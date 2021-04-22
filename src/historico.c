@@ -143,15 +143,15 @@ void trocaVariaveisHistorico(Historico *historico, int i, int j)
   float auxNota = historico[i].nota;
   historico[i].nota = historico[j].nota;
   historico[j].nota = auxNota;
+
   char auxTitulo1[150];
   char auxTitulo2[150];
-
   strcpy(auxTitulo1,historico[i].titulo);
   strcpy(auxTitulo2,historico[j].titulo);
   free(historico[i].titulo);
   free(historico[j].titulo);
-  historico[j].titulo = strdup(auxTitulo2);
-  historico[i].titulo = strdup(auxTitulo1);
+  historico[i].titulo = strdup(auxTitulo2);
+  historico[j].titulo = strdup(auxTitulo1);
 
   char auxData[20];
   strcpy(auxData,historico[i].data);

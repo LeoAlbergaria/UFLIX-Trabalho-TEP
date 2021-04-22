@@ -85,7 +85,7 @@ int menuPrincipal(Usuario* usuario,Filmes* filmes, int verbosidade)
         int qtdFilmes;
         if(filmes == NULL)
         {
-            qtdFilmes= 0;
+            qtdFilmes = 0;
             filmes = salvarFilmes(&qtdFilmes);
         }
         if(verbosidade)
@@ -138,7 +138,6 @@ int menuPerfil(Usuario *usuario, int verbosidade)
             imprimeMenuPerfil();
         }
         scanf("%s", operacao);
-        char titulo[100];
 
         switch(atoi(operacao)){
             case 1:

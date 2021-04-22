@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "../include/usuario.h"
 #include "../include/filmes.h"
 #include "../include/historico.h"
@@ -24,12 +25,13 @@ Filmes* salvarFilmes(int *qtdFilmes)
         exit(1);
     }
     char linha[300];
-    Filmes *filmes = (Filmes*)malloc(sizeof(Filmes));
+    Filmes *filmes = (Filmes*)malloc(10 * sizeof(Filmes));
 
     while(fgets(linha, 300, arquivoFilmes))
     {
         *qtdFilmes += 1;
-        filmes = (Filmes*)realloc(filmes, (*qtdFilmes) * sizeof(Filmes));
+        if(*qtdFilmes % 10 == 0)
+            filmes = (Filmes*)realloc(filmes, (*qtdFilmes + 10) * sizeof(Filmes));
         lerMetadados(filmes, (*qtdFilmes - 1) , linha);
     }
     fclose(arquivoFilmes);
@@ -51,9 +53,23 @@ void listarFilmes(Usuario *usuario, Filmes *filmes, int qtdFilmes, int verbosida
             if(verbosidade)
                 printf("M - mais filmes\n0 - Voltar");
             scanf("%s", opcao);
+            while(isalpha(opcao[0]) && opcao[0] != 'M')
+            {
+                if(verbosidade)
+                    printf("Opcao Invalida!!!Digite uma opcao novamente\n");
+                scanf("%s", opcao);
+            }
             if(opcao[0] >= '1' && opcao[0] <= '9')
             {
-                imprimirMetadadosFilme(filmes, atoi(opcao) - 1, usuario, verbosidade);
+                if(verbosidade)
+                    system("clear");
+                if(atoi(opcao) > i+1 || atoi(opcao) < (i+1 - 9))
+                {
+                    if(verbosidade)
+                        printf("Id de Filme Invalido!!!\n");
+                }
+                else
+                    imprimirMetadadosFilme(filmes, atoi(opcao) - 1, usuario, verbosidade);
                 i -= 10;
             }
             if(opcao[0] == '0')
@@ -62,12 +78,24 @@ void listarFilmes(Usuario *usuario, Filmes *filmes, int qtdFilmes, int verbosida
                     system("clear");
                 break;
             }
-            if(verbosidade)
-                system("clear");
+            if(opcao[0] == 'M') 
+            {
+                if(verbosidade)
+                    system("clear");
+            }
         }
     }
     if(opcao[0] != '0')
+    {
         printf("Fim de filmes disponiveis\n");
+        if(verbosidade)
+            printf("0 - Voltar\n");
+        scanf("%s", opcao);
+            if(opcao[0] >= '1' && opcao[0] <= '9')
+                imprimirMetadadosFilme(filmes, atoi(opcao) - 1, usuario, verbosidade);
+        if(verbosidade)
+            system("clear");
+    }
 }
 
 void lerMetadados(Filmes *filme, int num, char *linha)
@@ -91,8 +119,6 @@ void lerMetadados(Filmes *filme, int num, char *linha)
 void imprimirMetadadosFilme(Filmes *filme, int num, Usuario *usuario, int verbosidade)
 {
     char opcao[3];
-    if(verbosidade)
-        system("clear");
     printf("Titulo: %s\n", filme[num].titulo);
     printf("Ano: %d\n", filme[num].ano);
     printf("Duração: %d minutos\n", filme[num].duracao);
@@ -106,6 +132,8 @@ void imprimirMetadadosFilme(Filmes *filme, int num, Usuario *usuario, int verbos
         scanf("%s", opcao);
     if(opcao[0] == '1')
         assistirFilme(filme, num, usuario, verbosidade);
+    if(verbosidade)
+        system("clear");
 }
 
 void assistirFilme(Filmes *filme, int num, Usuario *usuario, int verbosidade)
@@ -117,10 +145,25 @@ void assistirFilme(Filmes *filme, int num, Usuario *usuario, int verbosidade)
     }
     float nota;
     scanf("%f", &nota);
-    char data[12];
+    while(nota > 10 || (nota < 0 && nota != -1))
+    {
+        if(verbosidade)
+            printf("Nota Invalida!!! De uma nota entre 0 e 10:\n");   
+        scanf("%f", &nota);
+    }
+    char data[20];
     if(verbosidade)
         printf("Data:");
     scanf("%s", data);
+    int dia, mes, ano;
+    sscanf(data, "%2d/%2d/%4d", &dia, &mes, &ano);
+    while((dia < 0 || mes < 0 || ano < 0) || dia > 31 || mes > 12)
+    {
+        if(verbosidade)
+            printf("Data Invalida!!! Digite uma data novamente:\n");  
+        scanf("%s", data);
+        sscanf(data, "%2d/%2d/%4d", &dia, &mes, &ano);
+    }
     colocarFilmeHistorico(filme[num].titulo, nota, data, usuario);
 }
 
@@ -158,14 +201,19 @@ void procurarFilme(Filmes *filmes, Usuario* usuario,  char *titulo, int qtdFilme
             comparador = strstr(tituloFilmesAux, titulo);
             if(comparador != NULL)
             {
-                printf("%d - %s\n",filmes[i].id, filmes[i].titulo);
+                printf("%d - %s\n",filmes[i].id + 1, filmes[i].titulo);
             }
         }
         if(verbosidade)
             printf("0 - Voltar\n");
         scanf("%d", &opcao);
         if(opcao != 0)
-            imprimirMetadadosFilme(filmes, opcao, usuario, verbosidade);
+        {
+            if(verbosidade)
+                system("clear");
+            if(opcao <= qtdFilmes && opcao >= 0)
+                imprimirMetadadosFilme(filmes, opcao - 1, usuario, verbosidade);
+        }
         else
         {
             if(verbosidade)
