@@ -233,4 +233,6 @@ void destroiFilmes(Filmes *filmes, int qtd)
         free(filmes[j].descricao);
     }
     free(filmes);
-}
+}/////
+///
+//
